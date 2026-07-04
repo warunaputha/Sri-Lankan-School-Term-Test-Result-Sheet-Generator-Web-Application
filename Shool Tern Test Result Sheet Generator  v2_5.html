@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>School Term Test Result Sheet Generator v2.5</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+
+  <!-- Developer Info -->
+  <!--
+    File: Shool Term Test Result Sheet Generator v2.4
+    Version: 2.5
+    Created: 2026-07-03
+    Purpose: Shool Term Test Result Sheet Generator 
+   
+    🎯 Result
+☑️Dynamic subject selection system
+☑️Religion / Language / Category dropdown auto replace system
+☑️Auto grade generation from marks
+☑️Grade color badges
+☑️Mobile responsive layout
+☑️PDF export using html2pdf
+☑️O/L & Term Test switching system
+☑️school name and school type live update
+✅ Mobile Responsive
+✅ Print Preview
+✅ Total Marks
+✅ Average Marks
+✅ Auto Save (localStorage)
+☑️ Clear Data button
+-->
+ 
+
+
+<style>
+
+body {
+    width:210mm;
+  margin:auto;
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
+}
+
+
+
+
+
+.container{
+  width:190mm;
+  min-height:277mm;
+
+  margin:auto;
+
+  background:#fff;
+
+  box-sizing:border-box;
+  padding:10mm;
+
+  position:relative;
+}
+
+
+
+.header {
+  text-align: center;
+}
+
+.header h2 {
+  margin: 5px 0;
+}
+
+
+
+
+
+
+
+
+.info {
+  margin-top: 20px;
+  transform: translateX(20px);
+}
+
+.info p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+
+.info-wrapper{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+}
+
+
+
+
+.school-header-row{
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:20px;
+
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+
+
+.logo-area{
+
+    width:100px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    flex-shrink:0;
+
+}
+
+
+
+
+#schoolLogo{
+
+    width:110px;
+    height:110px;
+
+    object-fit:contain;
+
+    display:none;
+
+    padding:5px;
+    margin-right:20px;
+
+    background:#fff;
+
+    border-radius:12px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+
+}
+
+.logo-box{
+    width:140px;
+    display:flex;
+    justify-content:flex-end;
+}
+
+
+
+.header-text{
+
+    text-align:center;
+
+}
+
+#schoolHeader{
+
+    margin:0;
+
+    font-size:34px;
+
+    font-weight:700;
+
+    color:#222;
+}
+
+#mainHeader{
+
+    margin-top:8px;
+
+    line-height:1.4;
+
+    color:#444;
+}
+
+
+
+
+
+.photo-box{
+  width:3.5cm;
+  height:4.5cm;
+
+  border:2px solid #222;
+  padding:3px;
+
+  background: linear-gradient(145deg, #fff, #f2f2f2);
+
+  box-shadow: 0 0 0 1px #999, 0 4px 10px rgba(0,0,0,0.25);
+  border-radius:8px;
+
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;   /* 🔥 important fix */
+  align-items:center;
+  justify-content:center;
+
+  position:relative;
+
+  margin-right:8px;
+  margin-left:auto;
+
+  /* ❌ transform remove (important) */
+}
+
+
+
+.photo-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+
+  display:block; /* 🔥 avoids gap issues */
+}
+
+.photo-label{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+
+  text-align:center;
+  font-size:10px;
+  color:#333;
+
+  background:rgba(255,255,255,0.85);
+  padding:2px 0;
+}
+
+#resultPhoto{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-group select:focus {
+  border-color: #007BFF;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0,123,255,0.4);
+}
+
+
+
+
+
+.subject-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  list-style: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+
+.subject-row button {
+  border: none;
+  background: crimson;
+  color: white;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.subject-row button:hover {
+  opacity: 0.8;
+}
+
+
+.subject-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.grade-badge {
+  min-width: 150px;
+  text-align: center;
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+  background: #999; /* default color */
+}
+
+
+
+
+/* Grade colors */
+
+.grade-A {
+  background: green;
+}
+
+.grade-B {
+  background: royalblue;
+}
+
+.grade-C {
+  background: orange;
+}
+
+.grade-S {
+  background: gray;
+}
+
+.grade-W {
+  background: crimson;
+}
+
+
+
+
+
+.subject-row input {
+  width: 80px;
+}
+
+
+.category-box {
+  margin-bottom: 18px;
+  padding: 15px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #dbe4ff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.category-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.category-box label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1d3557;
+}
+
+.category-box select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cfd8ff;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #f8f9ff;
+  transition: 0.3s;
+}
+
+.category-box select:focus {
+  border-color: #007BFF;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0 0 6px rgba(0,123,255,0.3);
+}
+
+
+
+#list input {
+  width: 90px;
+}
+
+
+
+
+
+input {
+  width: 250px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+input:focus {
+  border-color: #007BFF;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0,123,255,0.5);
+}
+
+
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  margin-top:20px;
+  font-size:12px;
+  flex-shrink:0;
+  margin-bottom:90px;
+}
+
+
+th, td{
+  border:1px solid black;
+  padding:4px;
+  text-align:center;
+}
+
+th:nth-child(1), td:nth-child(1){
+  width:18%;
+}
+
+th:nth-child(2), td:nth-child(2){
+  width:47%;
+  word-break:break-word;
+  word-wrap:break-word;
+}
+
+th:nth-child(3), td:nth-child(3){
+  width:15%;
+}
+
+th:nth-child(4), td:nth-child(4){
+  width:20%;
+}
+
+
+.table-header th{
+  background:#1a1a1a;
+  color:white;
+  font-size:14px;
+  padding:10px;
+  letter-spacing:0.5px;
+}
+
+
+.footer{
+  position:absolute;
+
+  left:10mm;
+  right:10mm;
+  bottom:10mm;
+
+  font-size:12px;
+  text-align:center;
+}
+
+.hidden{
+  display:none;
+}
+
+
+.signature-section{
+  margin-top:50px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.signature-box{
+  width:200px;
+  text-align:center;
+}
+
+.signature-line{
+  border-top:1px solid #000;
+  margin-bottom:8px;
+}
+
+.signature-box p{
+  margin:0;
+  font-weight:bold;
+}
+
+
+
+
+
+
+/* =========================
+   Mobile Responsive
+========================= */
+
+@media (max-width:768px){
+    
+    
+  
+  
+  body{
+    
+    overflow:auto;
+    
+  }
+  
+
+ 
+  #sheet{
+
+  width:210mm;
+  min-height:297mm;
+
+  margin:auto;
+}
+
+  /* HEADER */
+  .header h2{
+    font-size:26px;
+    line-height:1.2;
+  }
+
+  .header h3{
+    font-size:18px;
+    line-height:1.3;
+  }
+
+  /* INFO + PHOTO STACK */
+  .info-wrapper{
+    align-items:center;
+    gap:15px;
+  }
+
+  /* TEXT AREA */
+  .info{
+    width:100%;
+    transform:none !important;
+    margin-left:0 !important;
+  }
+
+  .info p{
+    font-size:15px;
+    line-height:1.5;
+  }
+
+  /* PHOTO */
+  .photo-box{
+    width:2.8cm;
+    height:3.5cm;
+  }
+
+  /* TABLE */
+  table{
+    width:100%;
+    font-size:12px;
+    overflow-x:auto;
+  }
+
+  th, td{
+    padding:6px;
+  }
+
+}
+
+@media print {
+
+ @page{
+  size:A4;
+  margin:8mm;
+}
+
+body{
+  background:white;
+  margin:0;
+  padding:0;
+}
+
+body *{
+  visibility:hidden;
+}
+
+#sheet,
+#sheet *{
+  visibility:visible;
+}
+
+#sheet{
+  position:relative;
+  left:0;
+  top:0;
+  width:100%;
+  
+  overflow:hidden;
+  page-break-inside: avoid;
+  box-shadow:none;
+  border:2px solid #111;
+  padding:15px;
+  background:white;
+}
+  
+#sheet::before{
+
+  content:"OFFICIAL";
+  position:absolute;
+  top:42%;
+  left:18%;
+  font-size:90px;
+  color:rgba(0,0,0,0.04);
+  transform:rotate(-30deg);
+  font-weight:900;
+  letter-spacing:10px;
+  pointer-events:none;
+}
+
+
+ 
+#sheet > *{
+  position:relative;
+  z-index:1;
+} 
+
+
+
+  table{
+    page-break-inside:auto;
+  }
+
+  tr{
+    page-break-inside:avoid;
+    page-break-after:auto;
+  }
+  
+ 
+
+}
+
+/* Chrome, Edge, Safari */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+
+
+
+
+
+
+
+
+</style>
+
+
+
+</head>
+
+
+
+
+
+
+
+<body>
+
+<div style="text-align:center;">
+    
+    <h2>School Term Test Result Sheet</h2>
+    
+    
+    
+    
+  <h3>Enter Details</h3>
+
+
+
+ 
+ <div class="form-group">
+ 
+ 
+ 
+ <label for="examination">Examination :</label>
+<select id="examination" onchange="handleExamChange()">
+  <option value="">Select Examination</option>
+  <option value="O/L">O/L</option>
+  <option value="Term Test">Term Test</option>
+</select>
+<br><br>
+
+
+
+
+<!-- Hidden dropdown -->
+<div id="termContainer" class="hidden"><label>Term :</label>
+  <select id="term">
+      
+    <option value="">Select Term</option>
+    <option value="1st Term">1st Term</option>
+    <option value="2nd Term">2nd Term</option>
+    <option value="3rd Term">3rd Term</option>
+  </select>
+  <br><br>
+</div>
+ 
+ 
+ 
+ 
+ 
+ <label for="school">School :</label>
+<input id="school" placeholder="Enter School Name"
+oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"><br><br>
+ 
+ 
+ 
+ <label for="schoolType">School Type :</label>
+
+<select id="schoolType">
+    
+    
+    <option value="">Select School Type</option>
+    <option value="College">College</option>
+    <option value="National College">National College</option>
+    <option value="Central College">Central College</option>
+    <option value="Junior College">Junior College</option>
+    
+    <option value="Maha Vidyalaya"> Maha Vidyalaya</option>
+    <option value="Maha Vidyalaya (National School)">Maha Vidyalaya (National School) </option>
+    <option value="Vidyalaya">Vidyalaya </option>
+    <option value="National School">National School </option>
+    <option value="Balika Vidyalaya"> Balika Vidyalaya</option>
+    <option value="Maha Vidyalayam"> Maha Vidyalayam</option>
+    <option value="Muslim College">Muslim College </option>
+    <option value="Tamil Maha Vidyalayam"> Tamil Maha Vidyalayam</option>
+    <option value="Primary School"> Primary School</option>
+    
+    
+</select>
+
+<br><br>
+
+<label for="schoolLogoInput">School Logo :</label>
+
+<input
+    type="file"
+    id="schoolLogoInput"
+    accept="image/*"
+    onchange="previewSchoolLogo(event)">
+
+<br><br>
+
+<img
+    id="schoolLogoPreview"
+    src=""
+    style="
+      width:70px;
+      height:70px;
+      object-fit:contain;
+      border:1px solid #ccc;
+      display:none;
+      border-radius:8px;
+    ">
+
+<br><br>
+
+
+ 
+ 
+<label for="year">Year :</label>
+<select id="year" required></select><br><br>
+ 
+
+  <label for="name">Student Name :</label>
+<input id="name" placeholder="Enter full name" required
+oninput="this.value = this.value.toUpperCase()"><br><br>
+
+ <label for="gradeLevel">Grade / Class :</label>
+<select id="gradeLevel" required></select>
+<br><br>
+
+
+
+
+ <label for="index" class="form-label">Index Number :</label>
+<input id="index" placeholder="Index Number"><br><br>
+
+
+
+ <label for="studentPhoto">Student Photo :</label>
+
+<input
+  type="file"
+  id="studentPhoto"
+  accept="image/*"
+  onchange="previewPhoto(event)"
+>
+
+<br><br>
+
+<img
+  id="photoPreview"
+  src=""
+  style="
+    width:80px;
+    height:100px;
+    object-fit:cover;
+    border:1px solid #ccc;
+    display:none;
+    border-radius:8px;
+  "
+>
+<br><br>
+
+  </div>
+ 
+  
+ 
+  
+  
+  
+  
+
+ 
+  
+ 
+  
+  
+  <ul id="list"></ul>
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+  <button onclick="generate()">📄 Generate PDF</button>
+  
+<button onclick="downloadPDF()">📥 Download PDF</button>
+
+  <button onclick="printSheet()">🖨 Print Preview</button>
+  
+  <button onclick="clearData()">🗑 Clear Data</button>
+  
+  
+</div>
+
+
+
+
+<div id="sheet" class="container" style="display:none;">
+
+  
+
+
+
+
+<div class="result-top">
+
+  <div class="result-header-text">
+
+
+<div class="header">
+
+    <h2 id="deptHeader">
+        DEPARTMENT OF EXAMINATIONS
+    </h2>
+
+  <div class="school-header-row">
+        
+   <div class="logo-box">
+        <img id="schoolLogo" src="" alt="School Logo">
+  </div>
+
+        
+        <div>
+
+            <h3 id="schoolHeader"></h3>
+
+            <h3 id="mainHeader"></h3>
+
+        </div>
+
+    </div>
+
+</div>
+
+  </div>
+
+ 
+
+</div>
+
+
+ <div class="info-wrapper">
+
+  <div class="info">
+      
+    <p class="hidden"><b>Examination:</b> <span id="rExam"></span></p>
+    
+    <p><b>Name:</b> <span id="rName"></span></p>
+    
+    <p><b>Grade:</b> <span id="rGradeLevel"></span></p>
+    
+    <p><b>Index Number:</b> <span id="rIndex"></span></p>
+    
+   
+    
+    <p class="hidden"><b>School:</b> <span id="rSchool"></span></p>
+    
+
+    
+    <p class="hidden"><b>Year:</b> <span id="rYear"></span></p>
+  </div>
+  
+
+
+
+  <div class="photo-box">
+  <img id="resultPhoto" src="" alt="Student Photo">
+  <div class="photo-label">Student Photo</div>
+</div>
+</div>
+
+
+
+
+ <table>
+
+ <thead>
+  <tr class="table-header">
+    <th>Subject Code</th>
+    <th>Subject Name</th>
+    <th>Grade</th>
+    <th>Marks</th>
+  </tr>
+</thead>
+
+  <tbody id="resultBody"></tbody>
+
+</table>
+
+
+
+<div class="footer-spacer"></div>
+ <div class="footer">
+
+  <div class="signature-section">
+
+    <div class="signature-box">
+  <div class="signature-line"></div>
+  <p>Class Teacher</p> <br>
+  <p>Date: 20_____/____/___</p>
+</div>
+
+<div class="signature-box">
+  <div class="signature-line"></div>
+  <p>Principal</p><br>
+ <p>Date: 20_____/____/___</p>
+</div>
+
+  </div>
+
+  <p style="margin-top:30px;">
+    This is a computer-generated result sheet for personal use.
+  </p>
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+<script>
+    
+    
+const gradeMarks = [
+  { grade: "A", min: 75, definition: "Distinction" },
+  { grade: "B", min: 65, definition: "Very Good Pass" },
+  { grade: "C", min: 50, definition: "Credit Pass" },
+  { grade: "S", min: 35, definition: "Ordinary Pass" },
+  { grade: "W", min: 0, definition: "Failure" }
+];
+
+
+
+
+function getGradeFromMarks(mark) {
+
+  for (let g of gradeMarks) {
+
+    if (mark >= g.min) {
+      return `${g.grade} (${g.definition})`;
+    }
+
+  }
+
+  return "W (Failure)";
+}
+
+
+
+
+
+
+const coreSubjects = [
+  "Sinhala/Tamil (Mother Language)",
+  "Religion",
+  "English Language",
+  "Mathematics",
+  "Science",
+  "History",
+  "Category I",
+  "Category II",
+  "Category III"
+  
+];
+
+
+
+const subjectCodes = {
+
+  // Core Subjects
+  "Sinhala Language & Literature": "21",
+  "Tamil Language & Literature": "22",
+
+  "Buddhism": "11",
+  "Saivanery": "12",
+  "Catholicism": "14",
+  "Christianity": "15",
+  "Islam": "16",
+
+  "English Language": "31",
+  "Mathematics": "32",
+  "Science": "33",
+  "History": "34",
+
+  // Category I
+  "Business & Accounting Studies": "60",
+  "Geography": "61",
+  "Civic Education": "62",
+  "Entrepreneurship Studies": "63",
+  "Second Language (Sinhala)": "64",
+  "Second Language (Tamil)": "65",
+  "Pali": "66",
+  "Sanskrit": "67",
+  "French": "68",
+  "German": "69",
+  "Hindi": "70",
+  "Japanese": "71",
+  "Arabic": "72",
+  "Korean": "73",
+  "Chinese": "74",
+  "Russian": "75",
+
+  // Category II
+  "Music (Oriental)": "40",
+  "Music (Western)": "41",
+  "Music (Carnatic)": "42",
+  "Art": "43",
+  "Dancing (Oriental)": "44",
+  "Dancing (Bharata)": "45",
+  "Appreciation of English Literary Texts": "46",
+  "Appreciation of Sinhala Literary Texts": "47",
+  "Appreciation of Tamil Literary Texts": "48",
+  "Appreciation of Arabic Literary Texts": "49",
+  "Drama and Theatre (Sinhala)": "50",
+  "Drama and Theatre (Tamil)": "51",
+  "Drama and Theatre (English)": "52",
+
+  // Category III
+  "Information & Communication Technology": "80",
+  "Agriculture & Food Technology": "81",
+  "Aquatic Bioresources Technology": "82",
+  "Home Economics": "84",
+  "Health & Physical Education": "86",
+  "Communication & Media Studies": "87",
+  "Design & Construction Technology": "88",
+  "Design & Mechanical Technology": "89",
+  "Design, Electrical & Electronic Technology": "90",
+  "Electronic Writing & Shorthand (Sinhala)": "92",
+  "Electronic Writing & Shorthand (Tamil)": "93",
+  "Electronic Writing & Shorthand (English)": "94"
+
+};
+
+
+    
+let subjects = [];
+
+
+function saveData() {
+
+  const data = {
+
+    examination:
+      document.getElementById("examination").value,
+
+    term:
+      document.getElementById("term").value,
+
+    school:
+      document.getElementById("school").value,
+      
+    schoolType:
+document.getElementById("schoolType").value,
+
+    year:
+      document.getElementById("year").value,
+
+    name:
+      document.getElementById("name").value,
+
+    gradeLevel:
+      document.getElementById("gradeLevel").value,
+
+    index:
+      document.getElementById("index").value,
+
+    subjects: subjects
+
+  };
+
+  localStorage.setItem(
+    "resultSheetData",
+    JSON.stringify(data)
+  );
+}
+
+
+
+function loadData() {
+
+  let saved =
+    localStorage.getItem("resultSheetData");
+
+  if (!saved) return;
+
+  let data = JSON.parse(saved);
+
+  document.getElementById("examination").value =
+    data.examination || "";
+
+  document.getElementById("term").value =
+    data.term || "";
+
+  document.getElementById("school").value =
+    data.school || "";
+    
+  document.getElementById("schoolType").value =
+data.schoolType || "";
+
+  document.getElementById("year").value =
+    data.year || "";
+
+  document.getElementById("name").value =
+    data.name || "";
+
+  document.getElementById("gradeLevel").value =
+    data.gradeLevel || "";
+
+  document.getElementById("index").value =
+    data.index || "";
+
+  if (data.subjects) {
+    subjects = data.subjects;
+  }
+
+  handleExamChange();
+
+  displayList();
+  
+  let savedLogo =
+localStorage.getItem("schoolLogo");
+
+if(savedLogo){
+
+    document.getElementById("schoolLogoPreview").src = savedLogo;
+    document.getElementById("schoolLogoPreview").style.display = "block";
+
+    document.getElementById("schoolLogo").src = savedLogo;
+    document.getElementById("schoolLogo").style.display = "block";
+
+} else {
+
+    document.getElementById("schoolLogoPreview").style.display = "none";
+    document.getElementById("schoolLogo").style.display = "none";
+
+}
+
+
+  
+  
+  let savedPhoto =
+  localStorage.getItem("studentPhoto");
+
+if (savedPhoto) {
+
+  document.getElementById(
+    "photoPreview"
+  ).src = savedPhoto;
+
+  document.getElementById(
+    "photoPreview"
+  ).style.display = "block";
+
+  document.getElementById(
+    "resultPhoto"
+  ).src = savedPhoto;
+
+  document.getElementById(
+    "resultPhoto"
+  ).style.display = "block";
+  
+  document.querySelector(".photo-label")
+.style.display = "none";
+} else {
+
+    document.getElementById("photoPreview").style.display = "none";
+    document.getElementById("resultPhoto").style.display = "none";
+
+    document.querySelector(".photo-label").style.display = "block";
+
+}
+  
+}
+
+
+
+
+
+
+
+
+function renderSubjectName(s, i) {
+  switch (s.sub) {
+
+    case "Sinhala/Tamil (Mother Language)":
+      return renderMotherLanguage(s, i);
+
+    case "Religion":
+      return renderReligion(s, i);
+
+    case "Category I":
+      return renderCategory1(s, i);
+
+    case "Category II":
+      return renderCategory2(s, i);
+
+    case "Category III":
+      return renderCategory3(s, i);
+
+    default:
+      return coreSubjects.includes(s.sub)
+        ? `<b>${s.sub}</b>`
+        : s.sub;
+  }
+}
+
+
+
+function renderMotherLanguage(s, i) {
+  if (s.selected) return `<b>${s.selected}</b>`;
+
+  return `
+    <select onchange="updateLanguage(${i}, this.value)">
+      <option value="">Language & Literature</option>
+      <option value="Sinhala Language & Literature">Sinhala Language & Literature</option>
+      <option value="Tamil Language & Literature">Tamil Language & Literature</option>
+    </select>
+  `;
+}
+
+
+
+function renderReligion(s, i) {
+  if (s.selected) return `<b>${s.selected}</b>`;
+
+  return `
+    <select onchange="updateReligion(${i}, this.value)">
+      <option value="">Religion</option>
+      <option value="Buddhism">Buddhism</option>
+      <option value="Saivanery">Saivanery</option>
+      <option value="Catholicism">Catholicism</option>
+      <option value="Christianity">Christianity</option>
+      <option value="Islam">Islam</option>
+    </select>
+  `;
+}
+
+
+function renderCategory1(s, i) {
+
+  if (s.selected) return `<b>${s.selected}</b>`;
+
+  return `
+    <select onchange="updateCategory1(${i}, this.value)">
+
+      <option value="">Category I</option>
+
+      <option value="Business & Accounting Studies">
+        60 Business & Accounting Studies
+      </option>
+
+      <option value="Geography">
+        61 Geography
+      </option>
+
+      <option value="Civic Education">
+        62 Civic Education
+      </option>
+
+      <option value="Entrepreneurship Studies">
+        63 Entrepreneurship Studies
+      </option>
+      
+       <option value="Second Language (Sinhala)"
+      >
+        64 Second Language (Sinhala)
+      </option>
+
+      <option value="Second Language (Tamil)"
+       >
+        65 Second Language (Tamil)
+      </option>
+
+      <option value="Pali"
+      >
+        66 Pali
+      </option>
+
+      <option value="Sanskrit"
+        >
+        67 Sanskrit
+      </option>
+
+      <option value="French"
+       >
+        68 French
+      </option>
+
+      <option value="German"
+       >
+        69 German
+      </option>
+
+      <option value="Hindi"
+        >
+        70 Hindi
+      </option>
+
+      <option value="Japanese"
+        >
+        71 Japanese
+      </option>
+
+      <option value="Arabic"
+        >
+        72 Arabic
+      </option>
+
+      <option value="Korean"
+        >
+        73 Korean
+      </option>
+
+      <option value="Chinese"
+       >
+        74 Chinese
+      </option>
+
+      <option value="Russian"
+       >
+        75 Russian
+      </option>
+      
+
+    </select>
+  `;
+}
+
+
+
+
+function renderCategory2(s, i) {
+
+  if (s.selected) return `<b>${s.selected}</b>`;
+
+  return `
+    <select onchange="updateCategory2(${i}, this.value)">
+
+      <option value="">Category II</option>
+
+      <option value="Music (Oriental)">
+        40 Music (Oriental)
+      </option>
+
+      <option value="Music (Western)">
+        41 Music (Western)
+      </option>
+
+      <option value="Music (Carnatic)">
+        42 Music (Carnatic)
+      </option>
+
+      <option value="Art">
+        43 Art
+      </option>
+      
+        <option value="Dancing (Oriental)"
+      >
+        44 Dancing (Oriental)
+      </option>
+
+      <option value="Dancing (Bharata)"
+     >
+        45 Dancing (Bharata)
+      </option>
+
+      <option value="Appreciation of English Literary Texts"
+    >
+        46 English Literary Texts
+      </option>
+
+      <option value="Drama and Theatre (English)"
+    >
+        52 Drama & Theatre (English)
+      </option>
+
+    </select>
+  `;
+}
+
+
+function renderCategory3(s, i) {
+
+  if (s.selected) return `<b>${s.selected}</b>`;
+
+  return `
+    <select onchange="updateCategory3(${i}, this.value)">
+
+      <option value="">Category III</option>
+
+      <option value="Information & Communication Technology">
+        80 ICT
+      </option>
+
+      <option value="Agriculture & Food Technology">
+        81 Agriculture & Food Technology
+      </option>
+
+      <option value="Home Economics">
+        84 Home Economics
+      </option>
+      
+      <option value="Health & Physical Education">
+        86 Health & PE
+      </option>
+      
+      
+      <option value= "Communication & Media Studies">
+        87 Communication & Media Studies
+      </option>
+        
+ 
+      <option value= "Design & Construction Technology">
+        88 Design & Construction Technology
+      </option>
+ 
+ 
+      <option value= "Design & Mechanical Technology">
+        89 Design & Mechanical Technology
+      </option>
+  
+  
+  
+      <option value= "Design, Electrical & Electronic Technology">
+        90 Design, Electrical & Electronic Technology
+      </option>
+      
+      
+      
+      <option value= "Electronic Writing & Shorthand (Sinhala)">
+        92 Electronic Writing & Shorthand (Sinhala)
+      </option>
+      
+      
+      <option value= "Electronic Writing & Shorthand (Tamil)">
+        93 Electronic Writing & Shorthand (Tamil)
+      </option>
+      
+      
+      <option value= "Electronic Writing & Shorthand (English)">
+        94 Electronic Writing & Shorthand (English)
+      </option>
+
+    </select>
+  `;
+}
+
+
+
+
+
+
+function displayList() {
+
+  let list = document.getElementById("list");
+  if (!list) return;
+
+  let html = "";
+
+  subjects.forEach((s, i) => {
+
+    html += `
+      <li class="subject-row">
+
+        <span class="subject-name">
+          ${renderSubjectName(s, i)}
+        </span>
+
+        <input
+          id="mark${i}"
+          type="number"
+          min="0"
+          max="100"
+          oninput="updateMarks(${i}, this.value)"
+          value="${s.marks || ""}"
+        >
+
+        <span 
+  id="grade${i}" 
+  class="grade-badge ${
+    s.grade?.startsWith("A") ? "grade-A" :
+    s.grade?.startsWith("B") ? "grade-B" :
+    s.grade?.startsWith("C") ? "grade-C" :
+    s.grade?.startsWith("S") ? "grade-S" :
+    s.grade?.startsWith("W") ? "grade-W" :
+    ""
+  }"
+>
+  ${s.grade || "Not Graded"}
+</span>
+
+        ${
+          !coreSubjects.includes(s.sub)
+            ? `<button onclick="removeSubject(${i})">❌</button>`
+            : ""
+        }
+
+      </li>
+    `;
+  });
+
+  list.innerHTML = html;
+  
+}
+
+
+
+
+
+
+
+
+
+
+function updateLanguage(index, value) {
+
+  subjects[index].selected = value;
+  subjects[index].code = subjectCodes[value] || "";
+
+  displayList();
+  saveData();
+
+}
+
+
+
+
+
+function updateReligion(index, value) {
+
+  subjects[index].selected = value;
+  subjects[index].code = subjectCodes[value] || "";
+
+  displayList();
+  saveData();
+  
+}
+
+
+
+
+
+
+function updateCategory1(index, value) {
+
+  subjects[index].selected = value;
+  subjects[index].code = subjectCodes[value] || "";
+
+  displayList();
+  saveData();
+}
+
+
+
+
+
+function updateCategory2(index, value) {
+
+  subjects[index].selected = value;
+  subjects[index].code = subjectCodes[value] || "";
+
+  displayList();
+  saveData();
+}
+
+
+function updateCategory3(index, value) {
+
+  subjects[index].selected = value;
+  subjects[index].code = subjectCodes[value] || "";
+
+  displayList();
+  saveData();
+
+}
+
+
+
+
+
+function removeSubject(i) {
+
+  // ✅ Protect core subjects
+  if (coreSubjects.includes(subjects[i].sub)) {
+    alert("Core subjects cannot be removed");
+    return;
+  }
+
+  let removed = subjects[i];
+
+  subjects.splice(i, 1);
+
+  // re-enable matching dropdown
+  let selects = document.querySelectorAll(".category-box select");
+
+  selects.forEach(sel => {
+
+    if (sel.dataset.category === removed.category) {
+
+      sel.disabled = false;
+      sel.value = "";
+
+    }
+
+  });
+
+  displayList();
+}
+
+
+
+document.addEventListener("DOMContentLoaded", function(){
+
+  // Year dropdown
+  let yearSelect = document.getElementById("year");
+  let currentYear = new Date().getFullYear();
+
+  yearSelect.innerHTML = `<option value="">Select Year</option>`;
+
+  for (let y = currentYear; y >= 2000; y--) {
+    yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+  }
+
+  // Grade dropdown
+  let gradeSelect = document.getElementById("gradeLevel");
+
+  gradeSelect.innerHTML = `<option value="">Select Grade</option>`;
+
+  for (let g = 6; g <= 11; g++) {
+    gradeSelect.innerHTML += `<option value="Grade ${g}">Grade ${g}</option>`;
+  }
+
+  // 🔥 NEW — auto add core subjects
+  subjects = coreSubjects.map(sub => ({
+
+  sub: sub,
+
+  code: subjectCodes[sub] || "",
+
+  selected: "",
+
+  grade: "",
+
+  marks: ""
+
+}));
+
+  displayList();
+  loadData();
+
+});
+
+
+
+function handleExamChange() {
+
+  let exam = document.getElementById("examination").value;
+
+  let termBox = document.getElementById("termContainer");
+
+  let deptHeader = document.getElementById("deptHeader");
+  let schoolHeader = document.getElementById("schoolHeader");
+
+  let schoolName = document.getElementById("school").value;
+  
+  let schoolType =
+document.getElementById("schoolType").value;
+
+  if (exam === "Term Test") {
+
+    termBox.style.display = "block";
+
+    // hide department, show school
+    deptHeader.style.display = "none";
+    
+    schoolHeader.innerText =
+schoolName +
+(schoolType ? " " + schoolType : "");
+
+
+    schoolHeader.style.display = "block";
+
+  } else {
+
+    termBox.style.display = "none";
+
+    // show department, hide school
+    deptHeader.style.display = "block";
+    schoolHeader.style.display = "none";
+  }
+}
+
+
+function updateMarks(index, value) {
+
+  // empty input handling
+  if (value === "") {
+
+    subjects[index].marks = "";
+    subjects[index].grade = "";
+
+    let gradeEl = document.getElementById("grade" + index);
+
+    if (gradeEl) {
+
+      gradeEl.innerText = "Not Graded";
+
+      gradeEl.classList.remove(
+        "grade-A",
+        "grade-B",
+        "grade-C",
+        "grade-S",
+        "grade-W"
+      );
+    }
+    saveData();
+    return;
+  }
+
+  let mark = Number(value);
+
+  if (isNaN(mark)) return;
+
+  if (mark < 0 || mark > 100) {
+    alert("Enter marks between 0 - 100");
+    return;
+  }
+
+  subjects[index].marks = mark;
+
+  let grade = getGradeFromMarks(mark);
+
+  subjects[index].grade = grade;
+
+  let gradeEl = document.getElementById("grade" + index);
+
+  if (gradeEl) {
+
+    gradeEl.innerText = grade;
+
+    // remove old colors
+    gradeEl.classList.remove(
+      "grade-A",
+      "grade-B",
+      "grade-C",
+      "grade-S",
+      "grade-W"
+    );
+
+    // apply new color
+    if (grade.startsWith("A")) {
+      gradeEl.classList.add("grade-A");
+    }
+    else if (grade.startsWith("B")) {
+      gradeEl.classList.add("grade-B");
+    }
+    else if (grade.startsWith("C")) {
+      gradeEl.classList.add("grade-C");
+    }
+    else if (grade.startsWith("S")) {
+      gradeEl.classList.add("grade-S");
+    }
+    else {
+      gradeEl.classList.add("grade-W");
+    }
+
+  }
+   saveData();
+}
+
+
+
+
+
+
+
+
+function updateGrade(index, value) {
+  // ❌ do nothing
+}
+
+
+
+
+
+
+function generate() {
+
+
+if(subjects.length === 0){
+    alert("Add at least one subject");
+    return;
+  }
+
+
+for (let i = 0; i < subjects.length; i++) {
+  if (subjects[i].marks === "" || subjects[i].marks === undefined) {
+    alert("Enter marks for: " + subjects[i].sub);
+
+    document.getElementById("mark" + i).focus();
+    return;
+  }
+}
+
+for (let i = 0; i < subjects.length; i++) {
+
+  if (
+    [
+      "Sinhala/Tamil (Mother Language)",
+      "Religion",
+      "Category I",
+      "Category II",
+      "Category III"
+    ].includes(subjects[i].sub)
+
+    && !subjects[i].selected
+  ) {
+
+    alert("Please select subject for: " + subjects[i].sub);
+
+    return;
+  }
+}
+
+
+
+  let name = document.getElementById("name").value;
+
+  // 🔴 Name validation
+  if (!name.trim()) {
+    alert("Please enter student name");
+    return;
+  }
+
+ let exam =
+  document.getElementById("examination").value;
+
+let header =
+  document.getElementById("mainHeader");
+
+if (exam === "O/L") {
+
+  header.innerText =
+    "General Certificate of Education (O/L)";
+
+} else {
+
+  let term =
+    document.getElementById("term").value;
+
+  let year =
+    document.getElementById("year").value;
+    
+  let grade =
+  document.getElementById("gradeLevel").value;
+
+  let formattedTerm = term
+  .replace("1st", "1<sup>st</sup>")
+  .replace("2nd", "2<sup>nd</sup>")
+  .replace("3rd", "3<sup>rd</sup>");
+
+
+  
+  header.innerHTML = `
+  School Term Test - ${year}
+
+  <div style="
+    margin-top:6px;
+    font-size:15px;
+    color:#444;
+    letter-spacing:1px;
+  ">
+    ${grade} - (${formattedTerm}) 
+  </div>
+`;
+
+}
+
+
+
+
+  
+  let term = document.getElementById("term").value;
+
+  // 🔴 Term validation
+  if (exam === "Term Test" && !term) {
+    alert("Please select term");
+    document.getElementById("term").focus();
+    return;
+  }
+
+  // ✅ continue
+  
+  
+  document.getElementById("sheet").style.display = "block";
+  
+  
+  
+  
+ //optional but recommended
+  window.scrollTo(0, 0);
+
+
+
+  document.getElementById("rName").innerText = name;
+
+  document.getElementById("rIndex").innerText =
+    document.getElementById("index").value;
+
+  document.getElementById("rSchool").innerText =
+    document.getElementById("school").value;
+
+  document.getElementById("rYear").innerText =
+    document.getElementById("year").value;
+
+  document.getElementById("rGradeLevel").innerText =
+    document.getElementById("gradeLevel").value;
+
+  // 🔥 Final Exam Text
+  let finalExam = exam;
+
+  if (exam === "Term Test" && term) {
+    finalExam = term + " - Term Test";
+  }
+
+  document.getElementById("rExam").innerText = finalExam;
+
+  let body = document.getElementById("resultBody");
+  body.innerHTML = "";
+  
+  
+  
+  
+let totalMarks = 0;
+let validCount = 0;
+
+subjects.forEach(s => {
+
+  let mark = Number(s.marks);
+
+  // valid marks only
+  if (!isNaN(mark)) {
+    totalMarks += mark;
+    validCount++;
+  }
+
+  body.innerHTML += `
+<tr>
+  <td>${s.code || ""}</td>
+  <td>${s.selected || s.sub}</td>
+  <td>${s.grade}</td>
+  <td>${s.marks ?? ""}</td>
+</tr>`;
+});
+
+
+// Total
+body.innerHTML += `
+<tr style="font-weight:bold; background:#f0f0f0;">
+  <td colspan="3">Total Marks</td>
+  <td>${totalMarks}</td>
+</tr>
+`;
+
+
+// Average
+let averageMarks =
+  validCount > 0
+    ? (totalMarks / validCount).toFixed(2)
+    : "0.00";
+
+body.innerHTML += `
+<tr style="font-weight:bold; background:#e8f4ff;">
+  <td colspan="3">Average Marks</td>
+  <td>${averageMarks}</td>
+</tr>
+`;
+
+
+
+
+}
+
+
+
+
+function downloadPDF() {
+
+  const element = document.getElementById("sheet");
+
+  if (element.style.display === "none") {
+    alert("Please generate result first");
+    return;
+  }
+
+  const opt = {
+    margin: 0,
+    filename: 'ResultSheet.pdf',
+
+    image: {
+      type: 'jpeg',
+      quality: 1
+    },
+
+    html2canvas: {
+      scale: 3,
+      useCORS: true,
+      scrollX: 0,
+      scrollY: 0
+    },
+
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
+    },
+
+    pagebreak: {
+      mode: ['avoid-all']
+    }
+  };
+
+  html2pdf().set(opt).from(element).save();
+}
+
+
+
+
+
+function printSheet() {
+
+  let sheet = document.getElementById("sheet");
+
+  if (sheet.style.display === "none") {
+    alert("Generate result first");
+    return;
+  }
+
+  window.print();
+}
+
+
+
+
+
+function clearData() {
+
+  if (!confirm("Clear all saved data?")) {
+    return;
+  }
+
+  // remove saved storage
+  localStorage.removeItem("resultSheetData");
+  
+  localStorage.removeItem("studentPhoto");
+  
+  localStorage.removeItem("schoolLogo");
+
+  // clear form fields
+  document.getElementById("examination").value = "";
+  document.getElementById("term").value = "";
+  document.getElementById("school").value = "";
+  document.getElementById("schoolType").value = "";
+  document.getElementById("year").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("gradeLevel").value = "";
+  document.getElementById("index").value = "";
+  
+  
+  
+  
+  // Logo Clear
+document.getElementById("schoolLogoInput").value = "";
+
+document.getElementById("schoolLogoPreview").src = "";
+document.getElementById("schoolLogoPreview").style.display = "none";
+
+document.getElementById("schoolLogo").src = "";
+document.getElementById("schoolLogo").style.display = "none";
+
+// Student Photo Clear
+document.getElementById("studentPhoto").value = "";
+
+document.getElementById("photoPreview").src = "";
+document.getElementById("photoPreview").style.display = "none";
+
+document.getElementById("resultPhoto").src = "";
+document.getElementById("resultPhoto").style.display = "none";
+
+document.querySelector(".photo-label").style.display = "block";
+
+
+
+
+  // hide term dropdown
+  handleExamChange();
+
+  // reset subjects
+  subjects = coreSubjects.map(sub => ({
+
+    sub: sub,
+    code: subjectCodes[sub] || "",
+    selected: "",
+    grade: "",
+    marks: ""
+
+  }));
+
+// refresh UI
+displayList();
+
+// Clear Result Table
+document.getElementById("resultBody").innerHTML = "";
+
+// hide result sheet
+document.getElementById("sheet").style.display = "none";
+
+alert("Data cleared successfully");
+}
+
+
+
+
+
+
+
+
+[
+  "examination",
+  "term",
+  "schoolType",
+  "school",
+  "year",
+  "name",
+  "gradeLevel",
+  "index"
+].forEach(id => {
+
+  document
+    .getElementById(id)
+    .addEventListener("input", saveData);
+
+  document
+    .getElementById(id)
+    .addEventListener("change", saveData);
+
+});
+
+
+
+
+
+
+
+// 🔥 School Name + School Type live update
+document.getElementById("school")
+.addEventListener("input", function () {
+
+  let exam = document.getElementById("examination").value;
+
+  let schoolHeader = document.getElementById("schoolHeader");
+
+  let schoolType =
+    document.getElementById("schoolType").value;
+
+  if (exam === "Term Test") {
+
+    schoolHeader.innerText =
+      this.value + (schoolType ? " " + schoolType : "");
+
+  }
+
+});
+
+
+// 🔥 School Type live update
+document.getElementById("schoolType")
+.addEventListener("change", function () {
+
+  let exam = document.getElementById("examination").value;
+
+  if (exam !== "Term Test") return;
+
+  let schoolName =
+    document.getElementById("school").value;
+
+  document.getElementById("schoolHeader").innerText =
+    schoolName + (this.value ? " " + this.value : "");
+
+});
+
+
+
+function previewSchoolLogo(event){
+
+    let file = event.target.files[0];
+
+    if(!file) return;
+
+    let reader = new FileReader();
+
+    reader.onload = function(e){
+
+        // Form Preview
+        let preview =
+            document.getElementById("schoolLogoPreview");
+
+        preview.src = e.target.result;
+        preview.style.display = "block";
+
+        // Result Sheet Logo
+        let logo =
+            document.getElementById("schoolLogo");
+
+        logo.src = e.target.result;
+        logo.style.display = "block";
+
+        // Save
+        localStorage.setItem(
+            "schoolLogo",
+            e.target.result
+        );
+
+    };
+
+    reader.readAsDataURL(file);
+
+}
+
+
+
+
+
+function previewPhoto(event) {
+
+  let file = event.target.files[0];
+
+  if (!file) return;
+
+  let reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    // form preview
+    let preview =
+      document.getElementById("photoPreview");
+
+    preview.src = e.target.result;
+    preview.style.display = "block";
+
+    // result sheet photo
+    let resultPhoto =
+      document.getElementById("resultPhoto");
+
+    resultPhoto.src = e.target.result;
+    resultPhoto.style.display = "block";
+
+    // 🔥 hide label
+    document.querySelector(".photo-label")
+    .style.display = "none";
+
+    // save localStorage
+    localStorage.setItem(
+      "studentPhoto",
+      e.target.result
+    );
+  };
+
+  reader.readAsDataURL(file);
+}
+
+</script>
+
+</body>
+</html>
